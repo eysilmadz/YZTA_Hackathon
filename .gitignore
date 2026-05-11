@@ -2,13 +2,30 @@
 Backend/venv/
 Backend/.venv/
 Backend/__pycache__/
+Backend/routers/__pycache__/
+Backend/*.pyc
 Backend/.env
+*.env
+
+# Veritabanı (yerel SQLite — repoya girmesin)
+Backend/*.db
+Backend/*.db-shm
+Backend/*.db-wal
 
 # React / Node
 Frontend/node_modules/
 Frontend/dist/
+Frontend/dist-ssr/
 Frontend/.eslintcache
+Frontend/*.local
+
+# IDE
+.idea/
+.vscode/
+*.suo
+*.sw?
 
 # Sistem
 .DS_Store
 Thumbs.db
+*.log
