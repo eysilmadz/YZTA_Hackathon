@@ -80,3 +80,28 @@ class AILog(Base):
             "content": self.content,
             "timestamp": self.timestamp.isoformat() if self.timestamp else None,
         }
+
+class Email(Base):
+    """
+    Gelen ve gönderilen mailleri tutar.
+    """
+    __tablename__ = "emails"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    sender = Column(String(255), nullable=False)
+    subject = Column(String(255), nullable=False)
+    body = Column(Text, nullable=False)
+    status = Column(String(50), default="unread") # unread | read | replied
+    ai_suggestion = Column(Text, nullable=True)   # AI'nın hazırladığı taslak yanıt
+    received_at = Column(DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "sender": self.sender,
+            "subject": self.subject,
+            "body": self.body,
+            "status": self.status,
+            "ai_suggestion": self.ai_suggestion,
+            "received_at": self.received_at.isoformat()
+        }

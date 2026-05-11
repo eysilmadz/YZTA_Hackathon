@@ -25,6 +25,10 @@ export default function Sidebar() {
         <span className="nav-icon">🏪</span> Stok Yönetimi
       </NavLink>
 
+      <NavLink to="/emails" className="nav-link">
+        <span>✉️</span> Gelen Kutusu
+      </NavLink>
+
       <div className="sidebar-footer">
         <p>Backend durumu</p>
         <span>● Online</span>

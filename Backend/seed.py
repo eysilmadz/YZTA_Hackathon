@@ -8,7 +8,7 @@ import sys
 sys.stdout.reconfigure(encoding="utf-8")
 
 from database import SessionLocal, create_tables
-from models import Order, Inventory, AILog
+from models import Order, Inventory, AILog, Email
 from datetime import datetime, timedelta
 
 # --------------------------------------------------------------------------- #
@@ -183,8 +183,22 @@ def clear_and_seed():
                 timestamp=today - timedelta(minutes=30),
             ),
         ]
-
         db.add_all(ai_logs)
+
+        emails = [
+            Email(
+                sender="ahmet.yilmaz@gmail.com",
+                subject="Siparişim nerede?",
+                body="Merhaba, dün verdiğim domates siparişi hala hazırlanıyor görünüyor. Ne zaman gelir?",
+            ),
+            Email(
+                sender="bilgi@tedarik.com",
+                subject="Fiyat Güncellemesi",
+                body="Önümüzdeki aydan itibaren zeytinyağı fiyatlarında %10 artış olacaktır.",
+            )
+        ]
+        db.add_all(emails)
+
         db.commit()
 
         # Sonuç raporu

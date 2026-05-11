@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import create_tables
-from routers import orders, inventory, dashboard
+from routers import orders, inventory, dashboard, emails
 
 app = FastAPI(title="SmartOps AI", version="1.0.0")
 
@@ -18,6 +18,7 @@ app.add_middleware(
 app.include_router(orders.router)
 app.include_router(inventory.router)
 app.include_router(dashboard.router)
+app.include_router(emails.router)
 
 # Uygulama başlarken tabloları oluştur
 @app.on_event("startup")

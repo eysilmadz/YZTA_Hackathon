@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar'
 import Dashboard from './pages/Dashboard'
 import OrdersPage from './pages/OrdersPage'
 import InventoryPage from './pages/InventoryPage'
+import EmailsPage from './pages/EmailsPage'
 
 export default function App() {
   return (
@@ -12,9 +13,10 @@ export default function App() {
         <Sidebar />
         <main className="main-content">
           <Routes>
-            <Route path="/"          element={<Dashboard />}     />
-            <Route path="/orders"    element={<OrdersPage />}    />
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/orders" element={<OrdersPage />} />
             <Route path="/inventory" element={<InventoryPage />} />
+            <Route path="/emails" element={<EmailsPage />} />
           </Routes>
         </main>
       </div>
