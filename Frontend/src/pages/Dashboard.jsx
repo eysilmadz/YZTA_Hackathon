@@ -35,16 +35,34 @@ function StockBar({ quantity, level }) {
 export default function Dashboard() {
   const [summary, setSummary] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError]     = useState(null)
+  const [error, setError] = useState(null)
+  const [runningChecks, setRunningChecks] = useState(false)
 
-  useEffect(() => {
+  const fetchSummary = () => {
+    setLoading(true)
     axios.get(`${API}/dashboard/summary`)
       .then(r => setSummary(r.data))
       .catch(() => setError('Backend\'e bağlanılamadı. Sunucunun çalıştığından emin olun.'))
       .finally(() => setLoading(false))
+  }
+
+  useEffect(() => {
+    fetchSummary()
   }, [])
 
-  if (loading) return (
+  const runDailyChecks = async () => {
+    setRunningChecks(true)
+    try {
+      await axios.post(`${API}/dashboard/run-daily-checks`)
+      fetchSummary()
+    } catch (err) {
+      alert("Günlük kontroller çalıştırılamadı!")
+    } finally {
+      setRunningChecks(false)
+    }
+  }
+
+  if (loading && !summary) return (
     <div className="loading-state">
       <div className="spinner" />
       <p>Veriler yükleniyor…</p>
@@ -62,16 +80,26 @@ export default function Dashboard() {
 
   return (
     <div>
-      <div className="page-header">
-        <h2>Dashboard</h2>
-        <p>Operasyonunuzun anlık görünümü</p>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2>Dashboard</h2>
+          <p>Operasyonunuzun anlık görünümü</p>
+        </div>
+        <button
+          onClick={runDailyChecks}
+          disabled={runningChecks}
+          className="btn-send"
+          style={{ padding: '8px 16px', fontSize: '13px' }}
+        >
+          {runningChecks ? 'Kontrol Ediliyor...' : 'Günlük Kontrolleri Yap'}
+        </button>
       </div>
 
       {/* Briefing Banner */}
       <div className="briefing-banner">
         <span className="briefing-icon">🤖</span>
         <div className="briefing-text">
-          <h3>AI Günlük Özeti</h3>
+          <h3>Günlük Asistan Özeti</h3>
           <p>{briefing}</p>
           <p className="briefing-date">{formatDate(date + 'T00:00:00')}</p>
         </div>
@@ -79,11 +107,11 @@ export default function Dashboard() {
 
       {/* Stat Cards */}
       <div className="stats-grid">
-        <StatCard label="Toplam Sipariş"    value={orders.total}     sub="tüm zamanlar"         variant="info"    />
-        <StatCard label="Kargo Bekliyor"    value={orders.pending}   sub="bugün gönderilmeli"   variant={orders.pending > 0 ? 'warning' : 'success'} />
-        <StatCard label="Kargoya Verildi"   value={orders.shipped}   sub="yolda"                variant="info"    />
-        <StatCard label="Teslim Edildi"     value={orders.delivered} sub="tamamlandı"           variant="success" />
-        <StatCard label="Kritik Stok"       value={inventory.critical_count} sub="acil tedarik gerekli" variant={inventory.critical_count > 0 ? 'danger' : 'success'} />
+        <StatCard label="Toplam Sipariş" value={orders.total} sub="tüm zamanlar" variant="info" />
+        <StatCard label="Kargo Bekliyor" value={orders.pending} sub="bugün gönderilmeli" variant={orders.pending > 0 ? 'warning' : 'success'} />
+        <StatCard label="Kargoya Verildi" value={orders.shipped} sub="yolda" variant="info" />
+        <StatCard label="Teslim Edildi" value={orders.delivered} sub="tamamlandı" variant="success" />
+        <StatCard label="Kritik Stok" value={inventory.critical_count} sub="acil tedarik gerekli" variant={inventory.critical_count > 0 ? 'danger' : 'success'} />
       </div>
 
       <div className="three-col">
@@ -123,7 +151,7 @@ export default function Dashboard() {
         {/* AI Log */}
         <div className="card">
           <div className="section-header">
-            <h3>🤖 Son AI Aksiyonları</h3>
+            <h3>🤖 Son Asistan Aksiyonları</h3>
           </div>
           <div className="alert-list">
             {recent_ai_actions.length === 0 ? (

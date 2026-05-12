@@ -11,7 +11,6 @@ router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 def get_dashboard_summary(db: Session = Depends(get_db)):
     """
     Ana Dashboard için tek sorguda özet veri döndürür.
-    Frontend'deki 'Günaydın Özeti' kartı ve widget'lar bu endpoint'ten beslenir.
     """
 
     # --- Sipariş istatistikleri ---
@@ -75,3 +74,26 @@ def get_dashboard_summary(db: Session = Depends(get_db)):
         },
         "recent_ai_actions": [log.to_dict() for log in recent_logs],
     }
+
+@router.post("/run-daily-checks")
+def run_daily_checks(db: Session = Depends(get_db)):
+    """
+    Kritik stokları ve kargo bekleyen siparişleri bulur, AI log tablosuna uyarı kaydı atar.
+    """
+    
+    # 1. Bekleyen sipariş kontrolü
+    pending_orders = db.query(Order).filter(Order.status == "hazırlanıyor").all()
+    if pending_orders:
+        log_content = f"Bugün {len(pending_orders)} adet paket gönderilmeli."
+        db.add(AILog(action_type="Sipariş Uyarısı", content=log_content))
+        
+    # 2. Stok seviyesi kontrolü
+    all_inventory = db.query(Inventory).all()
+    for item in all_inventory:
+        if item.stock_quantity < item.critical_level:
+            log_content = f"Acil: {item.item_name} stoğu bitiyor! (Kalan: {item.stock_quantity}, Eşik: {item.critical_level})"
+            db.add(AILog(action_type="Stok Uyarısı", content=log_content))
+            
+    db.commit()
+    
+    return {"status": "success", "message": "Günlük kontroller tamamlandı ve loglandı."}

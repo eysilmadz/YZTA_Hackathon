@@ -10,6 +10,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 from database import SessionLocal, create_tables
 from models import Order, Inventory, AILog, Email
 from datetime import datetime, timedelta
+from routers.dashboard import run_daily_checks
 
 # --------------------------------------------------------------------------- #
 # Yardımcı fonksiyon
@@ -163,16 +164,6 @@ def clear_and_seed():
         # ------------------------------------------------------------------- #
         ai_logs = [
             AILog(
-                action_type="Stok Uyarısı",
-                content="Domates stoğu kritik seviyenin altına düştü (4 adet kaldı, eşik: 10). Tedarikçi: tedarik@tazesebze.com",
-                timestamp=today - timedelta(hours=2),
-            ),
-            AILog(
-                action_type="Stok Uyarısı",
-                content="Zeytinyağı stoğu kritik seviyenin altına düştü (3 adet kaldı, eşik: 5). Tedarikçi: siparis@egeyag.com.tr",
-                timestamp=today - timedelta(hours=2),
-            ),
-            AILog(
                 action_type="Sipariş Sorgulama",
                 content="Müşteri ahmet.yilmaz@gmail.com sipariş durumu sorgulandı. Durum: hazırlanıyor. Kargo etiketi henüz oluşturulmadı.",
                 timestamp=today - timedelta(hours=1),
@@ -200,6 +191,10 @@ def clear_and_seed():
         db.add_all(emails)
 
         db.commit()
+
+        # Dinamik uyarıları oluştur (Gerçek iş kuralı fonksiyonunu çalıştırır)
+        print(">>> Dinamik uyarılar (Stok & Sipariş) oluşturuluyor...")
+        run_daily_checks(db)
 
         # Sonuç raporu
         print("=" * 50)
