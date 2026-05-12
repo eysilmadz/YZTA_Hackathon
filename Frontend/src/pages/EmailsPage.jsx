@@ -8,6 +8,7 @@ export default function EmailsPage() {
     const [selectedEmail, setSelectedEmail] = useState(null)
     const [replyText, setReplyText] = useState('')
     const [loading, setLoading] = useState(true)
+    const [isGeneratingReply, setIsGeneratingReply] = useState(false)
 
     useEffect(() => {
         axios.get(`${API}/emails/`)
@@ -16,9 +17,34 @@ export default function EmailsPage() {
             .finally(() => setLoading(false))
     }, [])
 
+    useEffect(() => {
+        if (!selectedEmail) return;
+
+        if (selectedEmail.ai_suggestion) {
+            setReplyText(selectedEmail.ai_suggestion);
+        } else {
+            setReplyText('');
+            setIsGeneratingReply(true);
+            axios.post(`${API}/emails/${selectedEmail.id}/generate-reply`)
+                .then(res => {
+                    const suggestion = typeof res.data === 'string' ? res.data : (res.data.ai_suggestion || res.data.reply || res.data.replyText || 'Yanıt oluşturulamadı.');
+                    setReplyText(suggestion);
+                })
+                .catch(err => {
+                    console.error("AI Yanıt hatası:", err);
+                    setReplyText('AI şu an meşgul, lütfen yanıtı manuel yazın.');
+                })
+                .finally(() => setIsGeneratingReply(false));
+        }
+    }, [selectedEmail]);
+
     const handleSelectEmail = (email) => {
         setSelectedEmail(email)
-        setReplyText(email.ai_suggestion || '')
+    }
+
+    const handleSend = () => {
+        console.log("Gönderilen Yanıt:", replyText);
+        alert('Yanıt başarıyla kaydedildi!');
     }
 
     if (loading) return <div className="loading-state"><div className="spinner" /></div>
@@ -65,17 +91,19 @@ export default function EmailsPage() {
 
                             {/* AI Taslak Bölümü */}
                             <div className="ai-suggestion-box">
-                                <div className="ai-header">
+                                <div className="ai-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <span>🤖 AI Yanıt Taslağı</span>
+                                    {isGeneratingReply && <span style={{ fontSize: '13px', color: 'var(--accent)' }}>⏳ AI yanıtı hazırlanıyor...</span>}
                                 </div>
                                 <textarea 
                                     className="ai-textarea"
                                     value={replyText}
                                     onChange={(e) => setReplyText(e.target.value)}
-                                    placeholder="Yanıtınızı buraya yazın..."
+                                    placeholder={isGeneratingReply ? "AI yanıtı bekleniyor..." : "Yanıtınızı buraya yazın..."}
+                                    style={{ opacity: isGeneratingReply ? 0.6 : 1, transition: 'opacity 0.3s' }}
                                 />
                                 <div className="ai-actions">
-                                    <button className="btn-send">Onayla ve Gönder</button>
+                                    <button className="btn-send" onClick={handleSend}>Onayla ve Gönder</button>
                                     <button className="btn-small">Taslağı Düzenle</button>
                                 </div>
                             </div>
