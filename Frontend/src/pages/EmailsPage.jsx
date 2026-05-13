@@ -12,6 +12,7 @@ export default function EmailsPage() {
     const [replyText, setReplyText] = useState('')
     const [loading, setLoading] = useState(true)
     const [isGeneratingReply, setIsGeneratingReply] = useState(false)
+    const [isEditing, setIsEditing] = useState(false)
 
     const getChannel = (sender) => {
         if (!sender) return 'email';
@@ -55,6 +56,7 @@ export default function EmailsPage() {
     useEffect(() => {
         if (!selectedEmail) return;
 
+        setIsEditing(false);
         if (selectedEmail.ai_suggestion) {
             setReplyText(selectedEmail.ai_suggestion);
         } else {
@@ -64,6 +66,7 @@ export default function EmailsPage() {
                 .then(res => {
                     const suggestion = typeof res.data === 'string' ? res.data : (res.data.ai_suggestion || res.data.reply || res.data.replyText || 'Yanıt oluşturulamadı.');
                     setReplyText(suggestion);
+                    setIsEditing(false);
                 })
                 .catch(err => {
                     console.error("AI Yanıt hatası:", err);
@@ -75,6 +78,7 @@ export default function EmailsPage() {
 
     const handleSelectEmail = (email) => {
         setSelectedEmail(email)
+        setIsEditing(false)
     }
 
     const handleSend = async () => {
@@ -86,13 +90,13 @@ export default function EmailsPage() {
             // Eğer Dashboard'dan gelen sanal bir taslak ise backend'i yormadan gönderildi sayıyoruz
             if (String(selectedEmail.id).startsWith('draft-')) {
                 alert('Yanıt başarıyla gönderildi!');
-                const updatedEmail = { ...selectedEmail, status: 'replied', repliedAt: repliedDate };
+                const updatedEmail = { ...selectedEmail, status: 'replied', repliedAt: repliedDate, sentReply: replyText };
                 setEmails(prev => prev.map(e => e.id === selectedEmail.id ? updatedEmail : e));
                 setSelectedEmail(updatedEmail);
                 return;
             }
 
-            await axios.put(`${API}/emails/${selectedEmail.id}/send`);
+            await axios.put(`${API}/emails/${selectedEmail.id}/send`, { replyText });
             
             alert('Yanıt başarıyla gönderildi!');
             const updatedEmail = { ...selectedEmail, status: 'replied', repliedAt: repliedDate };
@@ -216,7 +220,15 @@ export default function EmailsPage() {
                                             value={isGeneratingReply ? 'AI verileri analiz ediyor ve yanıt taslağı hazırlıyor...' : replyText}
                                             onChange={(e) => setReplyText(e.target.value)}
                                             placeholder="Yanıtınızı buraya yazın..."
-                                            style={{ opacity: isGeneratingReply ? 0.7 : 1, transition: 'opacity 0.3s' }}
+                                            readOnly={!isEditing}
+                                            style={{ 
+                                                opacity: isGeneratingReply ? 0.7 : 1, 
+                                                transition: 'all 0.3s',
+                                                border: isEditing ? '1px solid #4a90e2' : '1px solid var(--border)',
+                                                boxShadow: isEditing ? '0 0 8px rgba(74, 144, 226, 0.4)' : 'none',
+                                                backgroundColor: isEditing ? 'var(--bg-card)' : 'var(--bg-hover)',
+                                                outline: 'none'
+                                            }}
                                             disabled={isGeneratingReply}
                                         />
                                         <div className="ai-actions">
@@ -227,7 +239,12 @@ export default function EmailsPage() {
                                             >
                                                 {getChannel(selectedEmail.sender) === 'phone' ? 'Onayla ve WhatsApp/SMS Gönder' : 'Onayla ve E-posta Gönder'}
                                             </button>
-                                            <button className="btn-small">Taslağı Düzenle</button>
+                                            <button 
+                                                className="btn-small"
+                                                onClick={() => setIsEditing(!isEditing)}
+                                            >
+                                                {isEditing ? 'Düzenlemeyi Bitir' : 'Taslağı Düzenle'}
+                                            </button>
                                         </div>
                                     </>
                                 )}

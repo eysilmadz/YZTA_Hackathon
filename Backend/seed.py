@@ -186,6 +186,16 @@ def clear_and_seed():
                 sender="bilgi@tedarik.com",
                 subject="Fiyat Güncellemesi",
                 body="Önümüzdeki aydan itibaren zeytinyağı fiyatlarında %10 artış olacaktır.",
+            ),
+            Email(
+                sender="mustafa.kaya@hotmail.com",
+                subject="Kırık Ürün Teslimatı (Organik Bal)",
+                body="İyi günler, sipariş ettiğim 2 adet organik baldan birinin kavanozu kargoda maalesef kırılmış. Kargo tutanağı elimde mevcut, iade veya değişim sürecini nasıl başlatabilirim?",
+            ),
+            Email(
+                sender="ihracat@egeincir.com",
+                subject="Sevkiyat Gecikmesi Bilgilendirmesi",
+                body="Merhabalar, bölgedeki olumsuz hava şartları ve lojistik aksaklıklar nedeniyle bu haftaki 'Kuru İncir' sevkiyatımızda maalesef 2 günlük bir gecikme yaşanacaktır. Operasyonlarınızı buna göre planlamanızı rica ederiz. Anlayışınız için teşekkürler.",
             )
         ]
         db.add_all(emails)

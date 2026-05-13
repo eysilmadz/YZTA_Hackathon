@@ -29,10 +29,6 @@ export default function Sidebar() {
         <span>✉️</span> İletişim Merkezi
       </NavLink>
 
-      <div className="sidebar-footer">
-        <p>Backend durumu</p>
-        <span>● Online</span>
-      </div>
     </aside>
   )
 }
