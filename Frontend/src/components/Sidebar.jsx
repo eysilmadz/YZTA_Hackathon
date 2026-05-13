@@ -26,7 +26,7 @@ export default function Sidebar() {
       </NavLink>
 
       <NavLink to="/emails" className="nav-link">
-        <span>✉️</span> Gelen Kutusu
+        <span>✉️</span> İletişim Merkezi
       </NavLink>
 
       <div className="sidebar-footer">

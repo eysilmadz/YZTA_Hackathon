@@ -13,6 +13,23 @@ def list_emails(db: Session = Depends(get_db)):
     return [e.to_dict() for e in emails]
 
 
+@router.put("/{email_id}/send")
+def send_email_action(email_id: int, db: Session = Depends(get_db)):
+    # 1. Veritabanından ilgili maili bul
+    email = db.query(Email).filter(Email.id == email_id).first()
+
+    if not email:
+        raise HTTPException(status_code=404, detail="Mail bulunamadı")
+
+    # 2. Mailin durumunu 'replied' (cevaplandı) olarak güncelle
+    email.status = "replied"
+
+    # 3. Değişikliği kaydet
+    db.commit()
+    db.refresh(email)
+
+    return {"message": "Mail başarıyla gönderildi ve durumu güncellendi", "status": "replied"}
+
 @router.get("/{email_id}")
 def get_email(email_id: int, db: Session = Depends(get_db)):
     email = db.query(Email).filter(Email.id == email_id).first()

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
 const API = 'http://127.0.0.1:8000'
@@ -28,6 +29,7 @@ function StockBar({ quantity, level }) {
 }
 
 export default function InventoryPage() {
+  const navigate = useNavigate()
   const [items, setItems]     = useState([])
   const [alerts, setAlerts]   = useState([])
   const [loading, setLoading] = useState(true)
@@ -120,12 +122,13 @@ export default function InventoryPage() {
                   <th>Durum</th>
                   <th>Eksik Adet</th>
                   <th>Tedarikçi</th>
+                  <th>İşlemler</th>
                 </tr>
               </thead>
               <tbody>
                 {displayed.length === 0 ? (
                   <tr>
-                    <td colSpan={6}>
+                    <td colSpan={7}>
                       <div className="empty-state">
                         <span className="empty-icon">✅</span>
                         <p>Kritik stok uyarısı bulunmuyor</p>
@@ -163,6 +166,25 @@ export default function InventoryPage() {
                         }
                       </td>
                       <td className="td-secondary">{item.supplier_contact || '—'}</td>
+                      <td>
+                        {item.stock_quantity < item.critical_level && (
+                            <button
+                                title="Tedarikçiye Yaz"
+                                onClick={() => navigate('/emails', {
+                                    state: {
+                                        supplierContact: item.supplier_contact,
+                                        itemName: item.item_name,
+                                        currentStock: item.stock_quantity
+                                    }
+                                })}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', transition: 'transform 0.2s' }}
+                                onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.2)'}
+                                onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                            >
+                                ✉️
+                            </button>
+                        )}
+                      </td>
                     </tr>
                   )
                 })}
